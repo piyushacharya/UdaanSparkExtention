@@ -1,0 +1,4 @@
+{"commitInfo":{"timestamp":1612874894893,"operation":"CREATE TABLE AS SELECT","operationParameters":{"isManaged":"true","description":null,"partitionBy":"[]","properties":"{}"},"isBlindAppend":true,"operationMetrics":{"numFiles":"1","numOutputBytes":"3377","numOutputRows":"102"}}}
+{"protocol":{"minReaderVersion":1,"minWriterVersion":2}}
+{"metaData":{"id":"8d6968e9-0d37-48db-8679-789c3f3552c4","format":{"provider":"parquet","options":{}},"schemaString":"{\"type\":\"struct\",\"fields\":[{\"name\":\"id\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"orgn\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}},{\"name\":\"country\",\"type\":\"string\",\"nullable\":true,\"metadata\":{}}]}","partitionColumns":[],"configuration":{},"createdTime":1612874892801}}
+{"add":{"path":"part-00000-0606d47f-d445-43bb-ac3e-760378ad9e98-c000.snappy.parquet","partitionValues":{},"size":3377,"modificationTime":1612874894000,"dataChange":true}}

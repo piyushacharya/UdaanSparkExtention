@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="SparkJDBC42">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/MyWorkSpace/Databricks/Projects /02 Uddan/SQL EndPoint/SimbaSparkJDBC42-2.6.17.1021 (1)/SparkJDBC42.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/MyWorkSpace/Databricks/Projects /02 Uddan/SQL EndPoint/SimbaSparkJDBC42-2.6.17.1021 (1)/SparkJDBC42.jar!/com/simba/spark/jdbc42/internal/codegen/templates" />
+    </SOURCES>
+  </library>
+</component>
