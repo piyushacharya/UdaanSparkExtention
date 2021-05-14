@@ -50,7 +50,7 @@ object StartFindContent {
     val runForOrgans: List[String] = executionParam.runForOrgans
     var queryCount = 0;
     var index = 0
-    val orgnId = "100323"
+
     while (nodes.length > 0 || keepgoing == true) {
       for (n <- nodes) {
         n.status = NodeStatus.Finished
@@ -64,7 +64,7 @@ object StartFindContent {
           val queries = StringUtils.split(consolidate_query, "~~~")
 
           for (query <- queries) {
-            if (query.contains("direction_46_val")) {
+            if (query.contains("nps_score") && query.contains("target_100323")) {
               println(query)
               println("*********************")
             }
