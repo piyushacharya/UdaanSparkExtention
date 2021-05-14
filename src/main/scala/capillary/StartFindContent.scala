@@ -1,9 +1,13 @@
 package capillary
 
-import java.io.File
+import org.apache.commons.lang.StringUtils
 
-object StartGraphDep {
+import java.io.{File, PrintWriter}
+import scala.collection.mutable.ListBuffer
+
+object StartFindContent {
   def main(args: Array[String]): Unit = {
+
     val de = new DataExtractionService()
 
     val outFileNameLocation = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/output/consolidated/"
@@ -35,17 +39,49 @@ object StartGraphDep {
     val capQueryModifier = new CapQueryModifier()
 
     val graph = graphService.loadGraphData(node_link_loc, executionParam)
-    print(graph)
-
-    // graph.get_siblling_nodes("16918_org100323LookupTableLookupTable_from_nsadmin_messages_nsadmin_messages_n6091kpicomputephase100323d67b88bf-64da-4551-bc34-498d4f9600a7")
-//    graph.get_all_parents_nodes("16918_org100323LookupTableLookupTable_from_nsadmin_messages_nsadmin_messages_n6091kpicomputephase100323d67b88bf-64da-4551-bc34-498d4f9600a7")
-    val queryNode: Job_node = graph.get_job_node_by_name("16918_CreateOrgLevelTablesfortableusers_ndnc_statustruepartitionedtablesallorgscreateHiveTablesuser_management10550fa7-48fc-4fdf-b874-3c694ca1f0e8")
-    val dbNode: Job_node = graph.get_job_node_by_name("16918_CreatingdummyTableforuser_managementcreateHiveTablesuser_management8e55824f-626b-48a2-ae42-869e81213008")
 
 
+    var nodes: ListBuffer[Job_node] = graph.get_nodes_for_execution
 
+    var keepgoing = true
+    val baseFilePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/DAG/Metadata/dag_dump_dir_20210315/"
+
+
+    val runForOrgans: List[String] = executionParam.runForOrgans
+    var queryCount = 0;
+    var index = 0
+    val orgnId = "100323"
+    while (nodes.length > 0 || keepgoing == true) {
+      for (n <- nodes) {
+        n.status = NodeStatus.Finished
+        val nodeJsonPath = n.npath
+
+        if (n.npath != null && "null".equalsIgnoreCase(n.npath) == false) {
+
+          val consolidate_query = de.getdata(baseFilePath + n.npath + ".json")
+
+
+          val queries = StringUtils.split(consolidate_query, "~~~")
+
+          for (query <- queries) {
+            if (query.contains("direction_46_val")) {
+              println(query)
+              println("*********************")
+            }
+          }
+        }
+
+      }
+
+
+      nodes = graph.get_nodes_for_execution
+      if (nodes.length < 1)
+        keepgoing = false;
+
+
+    }
+
+    println(s"Done processing , total quries to process $queryCount ")
 
   }
 }
-
-

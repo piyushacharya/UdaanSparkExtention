@@ -286,26 +286,36 @@ class StartLoad(sc: SparkContext, spark: SparkSession, executionParam: Execution
 class CapQueryModifier() {
 
   def modifyQuery(query: String): String = {
-    if (query.toUpperCase().contains("DELTA")) {
-      (query)
-    } else if (query.length > 0) {
-      if (query.contains("USING PARQUET"))
-        return query.replace("USING PARQUET", "USING DELTA ")
 
-      if (query.contains("STORED AS PARQUET SELECT") || query.contains("STORED AS PARQUET AS") )
-        return query.replace("STORED AS PARQUET ", "USING DELTA ")
+    var newQuery= query
 
-      if (query.contains("STORED AS PARQUET SELECT"))
-        return query.replace("STORED AS PARQUET ", "USING DELTA AS ")
+    // for create table
+
+    if (newQuery.startsWith("CREATE TABLE") &&  newQuery.contains("IF NOT EXISTS") == false)
+      newQuery= newQuery.replace("CREATE TABLE", "CREATE TABLE IF NOT EXISTS ")
+
+
+
+    if (newQuery.toUpperCase().contains("DELTA")) {
+      (newQuery)
+    } else if (newQuery.length > 0) {
+      if (newQuery.contains("USING PARQUET"))
+        return newQuery.replace("USING PARQUET", "USING DELTA ")
+
+      if (newQuery.contains("STORED AS PARQUET SELECT") || newQuery.contains("STORED AS PARQUET AS") )
+        return newQuery.replace("STORED AS PARQUET ", "USING DELTA ")
+
+      if (newQuery.contains("STORED AS PARQUET SELECT"))
+        return newQuery.replace("STORED AS PARQUET ", "USING DELTA AS ")
 
     }
-    (query)
+    (newQuery)
   }
 
   def isQueryExecutable(batchDetails: BatchDetails, query: String): Boolean = {
     if (batchDetails != null && !batchDetails.restart) {
       if (query.toUpperCase().startsWith("DROP TABLE IF EXISTS"))
-        return true;
+        return false;
       else if (query.toUpperCase().startsWith("REFRESH TABLE "))
         return false;
     }
@@ -318,6 +328,23 @@ class CapQueryModifier() {
     if (query.toUpperCase().startsWith("SET SPARK.SQL")) {
       return false;
     }
-    (true)
+    if (query.toUpperCase().startsWith("DROP VIEW IF EXISTS")) {
+      return false;
+    }
+
+      (true)
+  }
+
+  def isSplCondition( query: String): Boolean = {
+    if (query.startsWith("CREATE TABLE") && query.contains("__hive_intermediate_16918__full"))
+      return true
+
+    if (query.startsWith("CREATE TABLE") && query.contains("__pre_dim_intermediate_16918"))
+      return true
+
+    if (query.startsWith("CREATE DATABASE") && query.contains("__pre_dim_intermediate_16918"))
+      return true
+
+    return false
   }
 }

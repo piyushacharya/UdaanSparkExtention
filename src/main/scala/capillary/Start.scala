@@ -2252,16 +2252,15 @@ object start {
           println("looking into ....")
 
         var createRrpreTransformforFile = false
-       if (n.npath != null && (n.npath.contains("Createpredimd") || n.npath.contains("Createpre") || n.npath.contains("Creatingdummy") || n.npath.contains("CreateRepartitioned")  || n.npath.contains("PreTransformfortableinventory")  )) {
+       if (n.npath != null && (n.npath.contains("Createpredimd") || n.npath.contains("Createpre") || n.npath.contains("Creatingdummy") || n.npath.contains("CreateRepartitioned")  || n.npath.contains("CreateDB_transpose") )) {
           pathConsider = true
-        }else if (n.npath != null && ( n.npath.contains("PreTransformfororg") ||  n.npath.contains("CreateOrgLevelTablesfortable"))) {
+        }else if (n.npath != null && ( n.npath.contains("PreTransformfororg") ||  n.npath.contains("CreateOrgLevelTablesfortable") ||  n.npath.contains("PreTransformfortableinventory")  )) {
+         pathConsider = true
+         createRrpreTransformforFile = true;
+       }else if (n.npath != null && ( n.npath.contains("_transpose") )) {
          pathConsider = true
          createRrpreTransformforFile = true;
        }
-
-
-
-
 
         if (n.npath != null && "null".equalsIgnoreCase(n.npath) == false && pathConsider == true) {
 
@@ -2281,26 +2280,32 @@ object start {
 
               if (capQueryModifier.isQueryExecutable(batchDetails, query)) {
                 val newQuery = capQueryModifier.modifyQuery(query)
-                if (writer == null && orgwriter == null) {
+
+                var addQuery = false
+
+                if (createRrpreTransformforFile == false) {
+                  addQuery = true
+                } else if (createRrpreTransformforFile == true && query.contains(orgnId)) {
+                  addQuery = true
+                }else if (createRrpreTransformforFile == true && capQueryModifier.isSplCondition(query)) {
+                  addQuery = true
+                }
+
+
+                if (addQuery == true && writer == null && orgwriter == null) {
                   writer = new PrintWriter(new File(outFileNameLocation + index + ".sql"))
                   orgwriter = new PrintWriter(new File(orgoutFileNameLocation + index + ".sql"))
                   index = index + 1
                 }
-                if (createRrpreTransformforFile == false) {
-                  println(query)
-                  println(newQuery)
-                  orgwriter.write(query + ";\n\r")
-                  writer.write(newQuery + ";\n\r")
-                  queryCount = queryCount + 1
-                  queryAddedInfile = true
-                } else if (createRrpreTransformforFile == true && query.contains(orgnId)) {
-                  println(query)
+                if (addQuery)
+                {
                   println(newQuery)
                   orgwriter.write(query + ";\n\r")
                   writer.write(newQuery + ";\n\r")
                   queryCount = queryCount + 1
                   queryAddedInfile = true
                 }
+
               }
 
 
@@ -2312,6 +2317,7 @@ object start {
               orgwriter.flush()
               println("-----------------------" + n.npath + "-----------------------")
             }
+
 
           }
         }
