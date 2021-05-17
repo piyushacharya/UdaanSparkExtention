@@ -110,10 +110,19 @@ class DataExtractionService {
     val lines: String = fSource.mkString
     fSource.close()
 
+    if (lines.contains("com.capillary.reon.workflow.FinalCreatePreHook") && lines.contains("customer_summary"))
+    {
+      println(lines)
+    }
+
+
+
     val jsonAst = lines.parseJson
 
     val tmp = jsonAst.asJsObject()
     val key = tmp.fields("key")
+
+
 
     if (fileName.contains("16918_orgdropCreateDatabasesnew_kpi_compute_100323attribution1003235d15cc35-dc04-4b8d-8ddb-2649a06aa978"))
       println("stop for inspection")
@@ -132,6 +141,20 @@ class DataExtractionService {
         stmt = "Dummy"
       } else if (stmt.toUpperCase.startsWith("SELECT 1") && level3PropertyFields.contains("dynamicSparkPosthookClassName") && level3PropertyFields.get("dynamicSparkPosthookClassName").get.asInstanceOf[JsString].value == "com.capillary.reon.commons.executors.posthooks.PersistFactSchemaToMeta") {
         stmt = "Dummy"
+      }
+      else if (stmt.toUpperCase.startsWith("SELECT 1") && level3PropertyFields.contains("dynamicSparkPrehookClassName") && level3PropertyFields.get("dynamicSparkPrehookClassName").get.asInstanceOf[JsString].value == "com.capillary.reon.dimension_builder.querygen.persistance.DimTargetTablePreHook") {
+        val db_name = level3PropertyFields.get("DATABASE_NAME").get
+        val table_name=level3PropertyFields.get("TABLE_NAME").get
+        val view_name = level3PropertyFields.get("VIEW_NAME").get
+        stmt = "CREATE OR REPLACE TABLE " + db_name + "."+table_name +" USING DELTA AS SELECT * from " + db_name+"." +view_name
+        stmt=stmt.replaceAll("\"","")
+      }
+      else if (stmt.toUpperCase.startsWith("SELECT 1") && level3PropertyFields.contains("dynamicSparkPrehookClassName") && level3PropertyFields.get("dynamicSparkPrehookClassName").get.asInstanceOf[JsString].value == "com.capillary.reon.workflow.FinalCreatePreHook") {
+        val db_name = level3PropertyFields.get("DATABASE_NAME").get
+        val table_name=level3PropertyFields.get("TABLE_NAME").get
+        val view_name = level3PropertyFields.get("DDL_VIEW_NAME").get
+        stmt = "CREATE OR REPLACE TABLE " + db_name + "."+table_name +" USING DELTA AS SELECT * from " + db_name+"." +view_name
+        stmt=stmt.replaceAll("\"","")
       }
       else if (stmt.toUpperCase.startsWith("SELECT 1") && level3PropertyFields.contains("dynamicSparkPrehookClassName") && level3PropertyFields.get("dynamicSparkPrehookClassName").get.asInstanceOf[JsString].value == "com.capillary.reon.sqoop.executors.RetrieveS3TaskPreHook") {
         stmt = "Dummy"

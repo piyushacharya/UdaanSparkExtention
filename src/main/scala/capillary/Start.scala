@@ -2248,8 +2248,8 @@ object start {
         PreTransformfortableorgCreateOrgLevelTablesfortable
         * */
 
-        if (n.npath != null  && n.npath.contains("16918_CreatingdummyTableforuser_managementcreateHiveTablesuser_management8e55824f-626b-48a2-ae42-869e81213008")  )
-          println("looking into ....")
+//        if (n.npath != null  && n.npath.contains("16918_create_view_dim_64_org_100323dim_target_table_creation100323bff7849d-6023-4943-b420-45b326b4294e")  )
+//          println("looking into ....")
 
         var createRrpreTransformforFile = false
        if (n.npath != null && (n.npath.contains("Createpredimd") || n.npath.contains("Createpre") || n.npath.contains("Creatingdummy") || n.npath.contains("CreateRepartitioned")  || n.npath.contains("CreateDB_transpose") )) {
@@ -2273,7 +2273,8 @@ object start {
             println("Stop for Inspection")
             de.getdata(baseFilePath + n.npath + ".json")
           }
-          if (consolidate_query != "Dummy") {
+          if (consolidate_query !=
+            "Dummy") {
             val queries = StringUtils.split(consolidate_query, "~~~")
             var queryAddedInfile = false
             for (query <- queries) {

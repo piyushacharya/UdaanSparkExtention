@@ -59,16 +59,16 @@ object StartFindContent {
         if (n.npath != null && "null".equalsIgnoreCase(n.npath) == false) {
 
           val consolidate_query = de.getdata(baseFilePath + n.npath + ".json")
-
-
           val queries = StringUtils.split(consolidate_query, "~~~")
 
           for (query <- queries) {
-            if (query.contains("nps_score") && query.contains("target_100323")) {
+            //&& query.toLowerCase().contains("target_100323")
+            if (query.toLowerCase().contains("MATERIALIZED".toLowerCase()) ) {
               println(query)
               println("*********************")
             }
           }
+
         }
 
       }
