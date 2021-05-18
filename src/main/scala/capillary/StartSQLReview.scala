@@ -9,8 +9,11 @@ object StartSQLReview {
   def main(args: Array[String]): Unit = {
     val de = new DataExtractionService()
 
-    val outFileNameLocation = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/output/consolidated/"
-    val orgoutFileNameLocation = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/output/original_consolidated/"
+    // val projectBasePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /"
+    val projectBasePath = "/Users/vijay.pavan/IdeaProjects/03.Capillary/"
+
+    val outFileNameLocation = projectBasePath + "newmetadata20200315/output/consolidated/"
+    val orgoutFileNameLocation = projectBasePath + "newmetadata20200315/output/original_consolidated/"
     try {
       new File(outFileNameLocation).delete()
 
@@ -28,7 +31,7 @@ object StartSQLReview {
     }
 
 
-    val node_link_loc = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/DAG/neo4j_dump_2021_03_15.csv"
+    val node_link_loc = projectBasePath + "newmetadata20200315/DAG/neo4j_dump_2021_03_15.csv"
     //    val orgs: List[String] = List("100323")
     val orgs: List[String] = List("100323")
     val executionParam: ExecutionParam = new ExecutionParam(parallelThread = 400, orgs);
@@ -43,7 +46,7 @@ object StartSQLReview {
     var nodes: ListBuffer[Job_node] = graph.get_nodes_for_execution
 
     var keepgoing = true
-    val baseFilePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/DAG/Metadata/dag_dump_dir_20210315/"
+    val baseFilePath = projectBasePath + "newmetadata20200315/DAG/Metadata/dag_dump_dir_20210315/"
 
 
     val runForOrgans: List[String] = executionParam.runForOrgans
@@ -75,6 +78,9 @@ object StartSQLReview {
 
         //        if (n.npath != null  && n.npath.contains("16918_create_view_dim_64_org_100323dim_target_table_creation100323bff7849d-6023-4943-b420-45b326b4294e")  )
         //          println("looking into ....")
+
+        if (n.npath != null && n.npath.contains(s"attribution$orgnId"))
+          pathConsider = true
 
         var createRrpreTransformforFile = false
         if (n.npath != null && (n.npath.contains("Createpredimd") || n.npath.contains("Createpre") || n.npath.contains("Creatingdummy") || n.npath.contains("CreateRepartitioned")  || n.npath.contains("CreateDB_transpose") )) {

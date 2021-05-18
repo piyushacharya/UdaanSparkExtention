@@ -10,8 +10,11 @@ object StartFindContent {
 
     val de = new DataExtractionService()
 
-    val outFileNameLocation = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/output/consolidated/"
-    val orgoutFileNameLocation = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/output/original_consolidated/"
+    // val projectBasePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /"
+    val projectBasePath = "/Users/vijay.pavan/IdeaProjects/03.Capillary/"
+
+    val outFileNameLocation = projectBasePath + "newmetadata20200315/output/consolidated/"
+    val orgoutFileNameLocation = projectBasePath + "newmetadata20200315/output/original_consolidated/"
     try {
       new File(outFileNameLocation).delete()
 
@@ -29,7 +32,7 @@ object StartFindContent {
     }
 
 
-    val node_link_loc = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/DAG/neo4j_dump_2021_03_15.csv"
+    val node_link_loc = projectBasePath + "newmetadata20200315/DAG/neo4j_dump_2021_03_15.csv"
     //    val orgs: List[String] = List("100323")
     val orgs: List[String] = List("100323")
     val executionParam: ExecutionParam = new ExecutionParam(parallelThread = 400, orgs);
@@ -44,7 +47,7 @@ object StartFindContent {
     var nodes: ListBuffer[Job_node] = graph.get_nodes_for_execution
 
     var keepgoing = true
-    val baseFilePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/DAG/Metadata/dag_dump_dir_20210315/"
+    val baseFilePath = projectBasePath + "newmetadata20200315/DAG/Metadata/dag_dump_dir_20210315/"
 
 
     val runForOrgans: List[String] = executionParam.runForOrgans
@@ -62,10 +65,12 @@ object StartFindContent {
           val queries = StringUtils.split(consolidate_query, "~~~")
 
           for (query <- queries) {
-            //&& query.toLowerCase().contains("target_100323")
-            if (query.toLowerCase().contains("MATERIALIZED".toLowerCase()) ) {
+            //&& query.toLowerCase().contains("target_100323")  MATERIALIZED
+            // new_kpi_compute_100323.ResultTable_from_JoinedTable_L_1_coupons_coupons_d_4f29b2dcebaf4
+            if (query.toLowerCase().contains("ResultTable_from_JoinedTable_L_1_coupons_coupons_d_4f29b2dcebaf4".toLowerCase()) ){
+            // && query.toLowerCase().contains("attribution_100323") ) {
               println(query)
-              println("*********************")
+              println("*********************" + n.npath)
             }
           }
 

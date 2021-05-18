@@ -354,7 +354,10 @@ class CapQueryModifier() {
     if (query.toUpperCase().startsWith("DROP VIEW IF EXISTS")) {
       return false;
     }
-
+    if (query.toUpperCase().startsWith("SHOW CREATE TABLE") ||
+      query.toUpperCase().startsWith("DESCRIBE EXTENDED")) {
+      return false;
+    }
       (true)
   }
 
