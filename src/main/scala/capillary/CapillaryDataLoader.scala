@@ -110,9 +110,11 @@ class DataExtractionService {
     val lines: String = fSource.mkString
     fSource.close()
 
-    if (lines.contains("com.capillary.reon.workflow.FinalCreatePreHook") && lines.contains("customer_summary"))
+    // lines.contains("com.capillary.reon.workflow.FinalCreatePreHook") &&
+
+    if ( lines.contains("refresh_segments_base_20210315213000_100323") && lines.contains("customer_summary") )
     {
-      println(lines)
+      println(fileName)
     }
 
 
@@ -150,6 +152,13 @@ class DataExtractionService {
         stmt=stmt.replaceAll("\"","")
       }
       else if (stmt.toUpperCase.startsWith("SELECT 1") && level3PropertyFields.contains("dynamicSparkPrehookClassName") && level3PropertyFields.get("dynamicSparkPrehookClassName").get.asInstanceOf[JsString].value == "com.capillary.reon.workflow.FinalCreatePreHook") {
+        val db_name = level3PropertyFields.get("DATABASE_NAME").get
+        val table_name=level3PropertyFields.get("TABLE_NAME").get
+        val view_name = level3PropertyFields.get("DDL_VIEW_NAME").get
+        stmt = "CREATE OR REPLACE TABLE " + db_name + "."+table_name +" USING DELTA AS SELECT * from " + db_name+"." +view_name
+        stmt=stmt.replaceAll("\"","")
+      }
+      else if (stmt.toUpperCase.startsWith("SELECT 1") && level3PropertyFields.contains("dynamicSparkPrehookClassName") && level3PropertyFields.get("dynamicSparkPrehookClassName").get.asInstanceOf[JsString].value == "com.capillary.reon.summary_kpi.core.TableWriteTaskPreHook") {
         val db_name = level3PropertyFields.get("DATABASE_NAME").get
         val table_name=level3PropertyFields.get("TABLE_NAME").get
         val view_name = level3PropertyFields.get("DDL_VIEW_NAME").get
@@ -308,6 +317,18 @@ class StartLoad(sc: SparkContext, spark: SparkSession, executionParam: Execution
 
 class CapQueryModifier() {
 
+  def getDateSecondColumn(sqlQuery: String): String = {
+    sqlQuery.substring(sqlQuery.lastIndexOf(',') + 1, sqlQuery.lastIndexOf(')')).trim
+  }
+
+  def getDateAddFirstPart(sqlQuery: String): String = {
+    sqlQuery.substring(0, sqlQuery.lastIndexOf(',') ).trim
+  }
+
+  def parseDateAddFunction(sqlQuery: String): String = {
+    String.format("%1$s, CAST(%2$s AS INT) )", getDateAddFirstPart(sqlQuery) , getDateSecondColumn(sqlQuery))
+  }
+
   def modifyQuery(query: String): String = {
 
     var newQuery= query
@@ -331,6 +352,15 @@ class CapQueryModifier() {
       if (newQuery.contains("STORED AS PARQUET SELECT"))
         return newQuery.replace("STORED AS PARQUET ", "USING DELTA AS ")
 
+      if (newQuery.contains("date_add(")) {
+        val pattern: scala.util.matching.Regex = "[(a-z_0-9\\s,.'%\\-)]+\\)(?=\\s[a-zA-Z]+\\sNULL\\send)".r
+        for (mtch <- pattern.findAllMatchIn(newQuery)) {
+          val matchedStr = mtch.toString()
+          // println("---->" + matchedStr + "\n -->" + parseDateAddFunction(matchedStr))
+          newQuery = newQuery.replace(matchedStr, parseDateAddFunction(matchedStr))
+        }
+        return newQuery
+      }
     }
     (newQuery)
   }

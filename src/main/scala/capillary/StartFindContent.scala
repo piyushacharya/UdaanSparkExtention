@@ -65,11 +65,13 @@ object StartFindContent {
           val queries = StringUtils.split(consolidate_query, "~~~")
 
           for (query <- queries) {
-            //&& query.toLowerCase().contains("target_100323")  MATERIALIZED
+            //&& query.toLowerCase().contains("target_100323")  MATERIALIZED,  attribution_100323
             // new_kpi_compute_100323.ResultTable_from_JoinedTable_L_1_coupons_coupons_d_4f29b2dcebaf4
-            if (query.toLowerCase().contains("ResultTable_from_JoinedTable_L_1_coupons_coupons_d_4f29b2dcebaf4".toLowerCase()) ){
-            // && query.toLowerCase().contains("attribution_100323") ) {
-              println(query)
+            // ead_api_100323.response_bill_summary;
+            // read_api_100323.response_bill_summary__view
+            if (query.toLowerCase().contains("refresh_segments_base_20210315213000_100323".toLowerCase())  ){
+             // && query.toLowerCase().contains("customer_summary") ) {
+              // println(query)
               println("*********************" + n.npath)
             }
           }
