@@ -14,14 +14,17 @@ import java.io.File
 
 object start {
 
-  def main1(args: Array[String]): Unit = {
+  // val projectBasePath = "/Users/vijay.pavan/IdeaProjects/03.Capillary/"
+  val projectBasePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /"
+
+  def main(args: Array[String]): Unit = {
 
 
-    val logbase_location = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /log/caplog/"
-    val seed_rel_file_loc = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /orch/DAG Metadata /seed_tables/seed_metadata.csv"
-    val seed_files_loc = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /orch/DAG Metadata /seed_tables"
-    val node_link_loc = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /orch/DAG Metadata /neo4j_dump.csv"
-    val node_folder_loc = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /orch/DAG Metadata /dag_dump_dir/"
+    val logbase_location = projectBasePath + "log/caplog/"
+    val seed_rel_file_loc = projectBasePath + "orch/DAG Metadata /seed_tables/seed_metadata.csv"
+    val seed_files_loc = projectBasePath + "orch/DAG Metadata /seed_tables"
+    val node_link_loc = projectBasePath + "orch/DAG Metadata /neo4j_dump.csv"
+    val node_folder_loc = projectBasePath + "orch/DAG Metadata /dag_dump_dir/"
 
     val spark = SparkSession
       .builder()
@@ -2181,11 +2184,11 @@ object start {
 
   }
 
-  def main(args: Array[String]): Unit = {
+  def main11(args: Array[String]): Unit = {
     val de = new DataExtractionService()
 
-    val outFileNameLocation = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/output/consolidated/"
-    val orgoutFileNameLocation = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/output/original_consolidated/"
+    val outFileNameLocation = projectBasePath + "newmetadata20200315/output/consolidated/"
+    val orgoutFileNameLocation = projectBasePath + "newmetadata20200315/output/original_consolidated/"
     try {
       new File(outFileNameLocation).delete()
 
@@ -2203,7 +2206,7 @@ object start {
     }
 
 
-    val node_link_loc = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/DAG/neo4j_dump_2021_03_15.csv"
+    val node_link_loc = projectBasePath + "newmetadata20200315/DAG/neo4j_dump_2021_03_15.csv"
     //    val orgs: List[String] = List("100323")
     val orgs: List[String] = List("100323")
     val executionParam: ExecutionParam = new ExecutionParam(parallelThread = 400, orgs);
@@ -2218,7 +2221,7 @@ object start {
     var nodes: ListBuffer[Job_node] = graph.get_nodes_for_execution
 
     var keepgoing = true
-    val baseFilePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/DAG/Metadata/dag_dump_dir_20210315/"
+    val baseFilePath = projectBasePath + "newmetadata20200315/DAG/Metadata/dag_dump_dir_20210315/"
 
 
     val runForOrgans: List[String] = executionParam.runForOrgans

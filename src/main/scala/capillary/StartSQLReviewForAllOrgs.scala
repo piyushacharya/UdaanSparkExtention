@@ -6,7 +6,9 @@ import java.io.{File, PrintWriter}
 import scala.collection.mutable.ListBuffer
 
 object StartSQLReviewForAllOrgs {
+
   def main(args: Array[String]): Unit = {
+
     val de = new DataExtractionService()
 
     // val projectBasePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /"
@@ -14,6 +16,7 @@ object StartSQLReviewForAllOrgs {
 
     val outFileNameLocation = projectBasePath + "newmetadata20200315/output/consolidated/"
     val orgoutFileNameLocation = projectBasePath + "newmetadata20200315/output/original_consolidated/"
+
     try {
       new File(outFileNameLocation).delete()
 
@@ -33,7 +36,7 @@ object StartSQLReviewForAllOrgs {
 
     val node_link_loc = projectBasePath + "newmetadata20200315/DAG/neo4j_dump_2021_03_15.csv"
     //    val orgs: List[String] = List("100323")
-    val orgs: List[String] = List("100323")
+    val orgs: List[String] = List() // List("100323")
     val executionParam: ExecutionParam = new ExecutionParam(parallelThread = 400, orgs);
     val graphService = new GraphService()
     val batchDetails: BatchDetails = new BatchDetails("local", 1, null, null, null, null, false, false)
@@ -52,7 +55,7 @@ object StartSQLReviewForAllOrgs {
     val runForOrgans: List[String] = executionParam.runForOrgans
     var queryCount = 0;
     var index = 0
-    val orgnId = "100323"
+    // val orgnId = "100323"
     while (nodes.length > 0 || keepgoing == true) {
       var writer: PrintWriter = null
       var orgwriter: PrintWriter = null
@@ -60,7 +63,7 @@ object StartSQLReviewForAllOrgs {
       for (n <- nodes) {
         n.status = NodeStatus.Finished
 
-        var pathConsider = false
+        /*var pathConsider = false
         val orgIndex = StringUtils.indexOf(n.npath, orgnId)
         if (orgIndex > 0) {
           val preChar = n.npath.charAt(orgIndex - 1)
@@ -69,7 +72,7 @@ object StartSQLReviewForAllOrgs {
             pathConsider = false
           else
             pathConsider = true
-        }
+        }*/
 
         /*
         PreTransformfortablegroup_detailsForDbcampaign_
@@ -79,7 +82,7 @@ object StartSQLReviewForAllOrgs {
         //        if (n.npath != null  && n.npath.contains("16918_create_view_dim_64_org_100323dim_target_table_creation100323bff7849d-6023-4943-b420-45b326b4294e")  )
         //          println("looking into ....")
 
-        if (n.npath != null && n.npath.contains(s"attribution$orgnId"))
+       /* if (n.npath != null && n.npath.contains(s"attribution$orgnId"))
           pathConsider = true
 
         var createRrpreTransformforFile = false
@@ -91,9 +94,10 @@ object StartSQLReviewForAllOrgs {
         }else if (n.npath != null && ( n.npath.contains("_transpose") )) {
           pathConsider = true
           createRrpreTransformforFile = true;
-        }
+        }*/
 
-        if (n.npath != null && "null".equalsIgnoreCase(n.npath) == false && pathConsider == true) {
+        // && pathConsider == true
+        if (n.npath != null && "null".equalsIgnoreCase(n.npath) == false ) {
 
 
           val nodeJsonPath = n.npath
@@ -113,15 +117,15 @@ object StartSQLReviewForAllOrgs {
               if (capQueryModifier.isQueryExecutable(batchDetails, query)) {
                 val newQuery = capQueryModifier.modifyQuery(query)
 
-                var addQuery = false
+                var addQuery = true
 
-                if (createRrpreTransformforFile == false) {
+                /*if (createRrpreTransformforFile == false) {
                   addQuery = true
                 } else if (createRrpreTransformforFile == true && query.contains(orgnId)) {
                   addQuery = true
                 }else if (createRrpreTransformforFile == true && capQueryModifier.isSplCondition(query)) {
                   addQuery = true
-                }
+                }*/
 
 
                 if (addQuery == true && writer == null && orgwriter == null) {
@@ -167,6 +171,6 @@ object StartSQLReviewForAllOrgs {
 
     }
 
-    println(s"Done processing , total quries to process $queryCount ")
+    println(s"Done processing , total queries to process $queryCount ")
   }
 }
