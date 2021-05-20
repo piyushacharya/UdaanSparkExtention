@@ -117,7 +117,7 @@ class TaskMaster(poolSize: Int, graph: Graph) {
         val result: ScheduledFuture[String] = executor.schedule(task, 0, TimeUnit.MILLISECONDS)
         task.setFuture(result)
         runningTasks.put(task.token, task)
-        jobSubmitFail = true
+        jobSubmitFail = false
       } else {
 
         val tokenReleaseCount = releaseTokens()

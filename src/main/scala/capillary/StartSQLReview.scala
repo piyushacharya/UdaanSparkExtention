@@ -37,7 +37,7 @@ object StartSQLReview {
     val executionParam: ExecutionParam = new ExecutionParam(parallelThread = 400, orgs);
     val graphService = new GraphService()
     val batchDetails: BatchDetails = new BatchDetails("local", 1, null, null, null, null, false, false)
-
+    val otherUtils = new OtherUtils
     val capQueryModifier = new CapQueryModifier()
 
     val graph = graphService.loadGraphData(node_link_loc, executionParam)
@@ -58,99 +58,102 @@ object StartSQLReview {
       var orgwriter: PrintWriter = null
 
       for (n <- nodes) {
-        n.status = NodeStatus.Finished
+        if (otherUtils.isDeadEndNode(n)) {
+          n.status = NodeStatus.dead_end
+        } else {
+          n.status = NodeStatus.Finished
 
-        var pathConsider = false
-        val orgIndex = StringUtils.indexOf(n.npath, orgnId)
-        if (orgIndex > 0) {
-          val preChar = n.npath.charAt(orgIndex - 1)
-          val postChar = n.npath.charAt(orgIndex + StringUtils.length(orgnId))
-          if ((preChar > 47 && preChar < 58) || (postChar > 47 && postChar < 58))
-            pathConsider = false
-          else
-            pathConsider = true
-        }
-
-        /*
-        PreTransformfortablegroup_detailsForDbcampaign_
-        PreTransformfortableorgCreateOrgLevelTablesfortable
-        * */
-
-        //        if (n.npath != null  && n.npath.contains("16918_create_view_dim_64_org_100323dim_target_table_creation100323bff7849d-6023-4943-b420-45b326b4294e")  )
-        //          println("looking into ....")
-
-        if (n.npath != null && n.npath.contains(s"attribution$orgnId"))
-          pathConsider = true
-
-        var createRrpreTransformforFile = false
-        if (n.npath != null && (n.npath.contains("Createpredimd") || n.npath.contains("Createpre") || n.npath.contains("Creatingdummy") || n.npath.contains("CreateRepartitioned")  || n.npath.contains("CreateDB_transpose") )) {
-          pathConsider = true
-        }else if (n.npath != null && ( n.npath.contains("PreTransformfororg") ||  n.npath.contains("CreateOrgLevelTablesfortable") ||  n.npath.contains("PreTransformfortableinventory")  )) {
-          pathConsider = true
-          createRrpreTransformforFile = true;
-        }else if (n.npath != null && ( n.npath.contains("_transpose") )) {
-          pathConsider = true
-          createRrpreTransformforFile = true;
-        }
-
-        if (n.npath != null && "null".equalsIgnoreCase(n.npath) == false && pathConsider == true) {
-
-
-          val nodeJsonPath = n.npath
-
-          val consolidate_query = de.getdata(baseFilePath + n.npath + ".json")
-          var dummyTask = false;
-          if ("select 1".equalsIgnoreCase(consolidate_query)) {
-            println("Stop for Inspection")
-            de.getdata(baseFilePath + n.npath + ".json")
+          var pathConsider = false
+          val orgIndex = StringUtils.indexOf(n.npath, orgnId)
+          if (orgIndex > 0) {
+            val preChar = n.npath.charAt(orgIndex - 1)
+            val postChar = n.npath.charAt(orgIndex + StringUtils.length(orgnId))
+            if ((preChar > 47 && preChar < 58) || (postChar > 47 && postChar < 58))
+              pathConsider = false
+            else
+              pathConsider = true
           }
-          if (consolidate_query !=
-            "Dummy") {
-            val queries = StringUtils.split(consolidate_query, "~~~")
-            var queryAddedInfile = false
-            for (query <- queries) {
 
-              if (capQueryModifier.isQueryExecutable(batchDetails, query)) {
-                val newQuery = capQueryModifier.modifyQuery(query)
+          /*
+          PreTransformfortablegroup_detailsForDbcampaign_
+          PreTransformfortableorgCreateOrgLevelTablesfortable
+          * */
 
-                var addQuery = false
+          //        if (n.npath != null  && n.npath.contains("16918_create_view_dim_64_org_100323dim_target_table_creation100323bff7849d-6023-4943-b420-45b326b4294e")  )
+          //          println("looking into ....")
 
-                if (createRrpreTransformforFile == false) {
-                  addQuery = true
-                } else if (createRrpreTransformforFile == true && query.contains(orgnId)) {
-                  addQuery = true
-                }else if (createRrpreTransformforFile == true && capQueryModifier.isSplCondition(query)) {
-                  addQuery = true
+          if (n.npath != null && n.npath.contains(s"attribution$orgnId"))
+            pathConsider = true
+
+          var createRrpreTransformforFile = false
+          if (n.npath != null && (n.npath.contains("Createpredimd") || n.npath.contains("Createpre") || n.npath.contains("Creatingdummy") || n.npath.contains("CreateRepartitioned") || n.npath.contains("CreateDB_transpose"))) {
+            pathConsider = true
+          } else if (n.npath != null && (n.npath.contains("PreTransformfororg") || n.npath.contains("CreateOrgLevelTablesfortable") || n.npath.contains("PreTransformfortableinventory"))) {
+            pathConsider = true
+            createRrpreTransformforFile = true;
+          } else if (n.npath != null && (n.npath.contains("_transpose"))) {
+            pathConsider = true
+            createRrpreTransformforFile = true;
+          }
+
+          if (n.npath != null && "null".equalsIgnoreCase(n.npath) == false && pathConsider == true) {
+
+
+            val nodeJsonPath = n.npath
+
+            val consolidate_query = de.getdata(baseFilePath + n.npath + ".json")
+            var dummyTask = false;
+            if ("select 1".equalsIgnoreCase(consolidate_query)) {
+              println("Stop for Inspection")
+              de.getdata(baseFilePath + n.npath + ".json")
+            }
+            if (consolidate_query !=
+              "Dummy") {
+              val queries = StringUtils.split(consolidate_query, "~~~")
+              var queryAddedInfile = false
+              for (query <- queries) {
+
+                if (capQueryModifier.isQueryExecutable(batchDetails, query)) {
+                  val newQuery = capQueryModifier.modifyQuery(query)
+
+                  var addQuery = false
+
+                  if (createRrpreTransformforFile == false) {
+                    addQuery = true
+                  } else if (createRrpreTransformforFile == true && query.contains(orgnId)) {
+                    addQuery = true
+                  } else if (createRrpreTransformforFile == true && capQueryModifier.isSplCondition(query)) {
+                    addQuery = true
+                  }
+
+
+                  if (addQuery == true && writer == null && orgwriter == null) {
+                    writer = new PrintWriter(new File(outFileNameLocation + index + ".sql"))
+                    orgwriter = new PrintWriter(new File(orgoutFileNameLocation + index + ".sql"))
+                    index = index + 1
+                  }
+                  if (addQuery) {
+                    println(newQuery)
+                    orgwriter.write(query + ";\n\r")
+                    writer.write(newQuery + ";\n\r")
+                    queryCount = queryCount + 1
+                    queryAddedInfile = true
+                  }
+
                 }
 
 
-                if (addQuery == true && writer == null && orgwriter == null) {
-                  writer = new PrintWriter(new File(outFileNameLocation + index + ".sql"))
-                  orgwriter = new PrintWriter(new File(orgoutFileNameLocation + index + ".sql"))
-                  index = index + 1
-                }
-                if (addQuery)
-                {
-                  println(newQuery)
-                  orgwriter.write(query + ";\n\r")
-                  writer.write(newQuery + ";\n\r")
-                  queryCount = queryCount + 1
-                  queryAddedInfile = true
-                }
-
+              }
+              if (queryAddedInfile) {
+                writer.write("-----------------------" + n.npath + "-----------------------\n\r")
+                orgwriter.write("-----------------------" + n.npath + "-----------------------\n\r")
+                writer.flush()
+                orgwriter.flush()
+                println("-----------------------" + n.npath + "-----------------------")
               }
 
 
             }
-            if (queryAddedInfile) {
-              writer.write("-----------------------" + n.npath + "-----------------------\n\r")
-              orgwriter.write("-----------------------" + n.npath + "-----------------------\n\r")
-              writer.flush()
-              orgwriter.flush()
-              println("-----------------------" + n.npath + "-----------------------")
-            }
-
-
           }
         }
       }

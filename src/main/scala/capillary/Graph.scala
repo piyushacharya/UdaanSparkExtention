@@ -18,7 +18,7 @@ import org.apache.spark.sql.SparkSession
 import java.util.concurrent.{ExecutorService, Executors}
 
 object NodeStatus extends Enumeration {
-  val None, init, Started, Finished, Error = Value
+  val None, init, Started, Finished, Error,dead_end = Value
 }
 
 class Graph {
@@ -150,6 +150,11 @@ class Graph {
     for (e <- in_edges) {
       if (e.from_node.status == NodeStatus.None || e.from_node.status == NodeStatus.Started)
         return false
+
+      if (e.from_node.status == NodeStatus.dead_end) {
+        job_node.status = NodeStatus.dead_end
+        return false
+      }
     }
     return true;
   }

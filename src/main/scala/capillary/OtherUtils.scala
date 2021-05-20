@@ -5,6 +5,22 @@ import scala.io.Source
 
 class OtherUtils {
 
+  def isDeadEndNode(node : Job_node): Boolean ={
+
+    val path = node.npath;
+    if (path != null && path != "null" )
+    {
+      if (path.toLowerCase().contains("createBaseTablesRefreshSegmentsBulk".toLowerCase()))
+      {
+        return true;
+      }
+    }
+
+
+    return (false)
+  }
+
+
 }
 
 class ReviewUtilities
