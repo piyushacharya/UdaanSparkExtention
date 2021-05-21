@@ -560,8 +560,10 @@ class EsBasedLogger(esloggerSwitch: Boolean) extends AppLogger {
   }
 
   override def closeLogger(): Unit = {
-    ingestor.stopLog()
-    restClient.close()
+    if (esloggerSwitch) {
+      ingestor.stopLog()
+      restClient.close()
+    }
 
 
   }
