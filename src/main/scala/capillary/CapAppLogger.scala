@@ -290,7 +290,11 @@ class EsLogIngestor(restClient: RestHighLevelClient, logs: java.util.concurrent.
             index = ingestionRate + 1
           }
         }
-        println(s" Log left  [${logs.size()}] ")
+        if (logs.size() > 0) {
+          println(s" Log left  [${logs.size()}] ")
+        }
+
+
         if (add == true) {
           restClient.bulk(bulkRequest, RequestOptions.DEFAULT)
         }

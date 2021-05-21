@@ -14,17 +14,17 @@ import java.io.File
 
 object start {
 
-  // val projectBasePath = "/Users/vijay.pavan/IdeaProjects/03.Capillary/"
-  val projectBasePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /"
+  val projectBasePath = "/Users/vijay.pavan/IdeaProjects/03.Capillary/newmetadata20200315/DAG/"
+  // val projectBasePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /orch/DAG Metadata /"
 
   def main(args: Array[String]): Unit = {
 
 
     val logbase_location = projectBasePath + "log/caplog/"
-    val seed_rel_file_loc = projectBasePath + "orch/DAG Metadata /seed_tables/seed_metadata.csv"
-    val seed_files_loc = projectBasePath + "orch/DAG Metadata /seed_tables"
-    val node_link_loc = projectBasePath + "orch/DAG Metadata /neo4j_dump.csv"
-    val node_folder_loc = projectBasePath + "orch/DAG Metadata /dag_dump_dir/"
+    val seed_rel_file_loc = projectBasePath + "Metadata/seed_tables/seed_metadata.csv"
+    val seed_files_loc = projectBasePath + "Metadata/seed_tables"
+    val node_link_loc = projectBasePath + "neo4j_dump_2021_03_15.csv"
+    val node_folder_loc = projectBasePath + "Metadata/dag_dump_dir_20210315/"
 
     val spark = SparkSession
       .builder()

@@ -18,7 +18,7 @@ import org.apache.spark.sql.SparkSession
 import java.util.concurrent.{ExecutorService, Executors}
 
 object NodeStatus extends Enumeration {
-  val None, init, Started, Finished, Error,dead_end = Value
+  val None, init, Started, Finished, Error, dead_end = Value
 }
 
 class Graph {
@@ -380,6 +380,9 @@ class GraphService {
 
   }
 
+  def isValidNode(node: Job_node): Boolean = {
+    !node.key.contains("-null") && node.npath != null && !node.npath.contains("null")
+  }
 
   def executeGraph(graph: Graph, sc: SparkContext, poolSize: Int, spark: SparkSession, batchDetails: BatchDetails, executionParam: ExecutionParam, caplogger: AppLogger): Int = {
 
@@ -413,18 +416,25 @@ class GraphService {
         for (n <- nodes) {
           val key = n.key
 
-          n.status = NodeStatus.init
-          new LogEntryBuilder().withBatchId(batchDetails.batch_id).withTaskId(n.key).withGroup("TASK_DETAILS").withType("TASK_BEFORE_SUBMITTED").buildAndLog(caplogger);
-          //          val capTestTask = new SimpleSparkTestTask(spark = spark, sc = sc, job_node = n, executionParam = executionParam, batchDetails = batchDetails,caplogger=caplogger)
-          val capTestTask = new CapTask(spark = spark, sc = sc, job_node = n, executionParam = executionParam, batchDetails = batchDetails, caplogger = caplogger)
+          if (isValidNode(n)) {
 
-          index = index + 1
-          capTestTask.index = index
+            n.status = NodeStatus.init
+            new LogEntryBuilder().withBatchId(batchDetails.batch_id).withTaskId(n.key).withGroup("TASK_DETAILS").withType("TASK_BEFORE_SUBMITTED").buildAndLog(caplogger);
+            //          val capTestTask = new SimpleSparkTestTask(spark = spark, sc = sc, job_node = n, executionParam = executionParam, batchDetails = batchDetails,caplogger=caplogger)
+            println("N.key :: " + n.key)
+            val capTestTask = new CapTask(spark = spark, sc = sc, job_node = n, executionParam = executionParam, batchDetails = batchDetails, caplogger = caplogger)
 
-          taskMaster.submitTask(capTestTask)
+            index = index + 1
+            capTestTask.index = index
 
-          //          println(s"Node # $index of $totalNodes nodes submitted ")
-          //        capTestTask.call()
+            taskMaster.submitTask(capTestTask)
+
+            //          println(s"Node # $index of $totalNodes nodes submitted ")
+            //        capTestTask.call()
+          } else {
+            // println("null task :: " + n.npath)
+            n.status = NodeStatus.Finished
+          }
 
         }
 

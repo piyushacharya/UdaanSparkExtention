@@ -112,10 +112,10 @@ class DataExtractionService {
 
     // lines.contains("com.capillary.reon.workflow.FinalCreatePreHook") &&
 
-    if ( lines.contains("refresh_segments_base_20210315213000_100323") && lines.contains("customer_summary") )
+    /*if ( lines.contains("dimension_src_merged_100359.subscription_transpose_100359_merged_temp") )
     {
-      println(fileName)
-    }
+      println("\nfileName --> " + fileName.substring(fileName.indexOf("Capillary")))
+    }*/
 
 
 
@@ -126,8 +126,10 @@ class DataExtractionService {
 
 
 
-    if (fileName.contains("16918_orgdropCreateDatabasesnew_kpi_compute_100323attribution1003235d15cc35-dc04-4b8d-8ddb-2649a06aa978"))
+    if (fileName.contains("16918_orgdropCreateDatabasesnew_kpi_compute_100323attribution1003235d15cc35-dc04-4b8d-8ddb-2649a06aa978")) {
       println("stop for inspection")
+    }
+
     val level1PropertyFields = tmp.fields.get("properties").get.asJsObject().fields
 
 
@@ -294,7 +296,7 @@ class StartLoad(sc: SparkContext, spark: SparkSession, executionParam: Execution
     new LogEntryBuilder().withBatchId(batchDetails.batch_id).withType("GRAPH_INFO").withGroup("GRAPH").withRemark("GRAPH_STARTED").buildAndLog(caplogger);
     val graph = cdl.loadGraph(batchDetails.node_link_loc, caplogger, executionParam)
 
-    println(graph)
+    println("graph:: " + graph)
 
     if (restart) {
       val complted_task_ids = caplogger.getCompltedTasks(curr_batch_id)
@@ -359,6 +361,11 @@ class CapQueryModifier() {
           // println("---->" + matchedStr + "\n -->" + parseDateAddFunction(matchedStr))
           newQuery = newQuery.replace(matchedStr, parseDateAddFunction(matchedStr))
         }
+        return newQuery
+      }
+
+      if (newQuery.startsWith("CREATE TABLE IF NOT EXISTS") && newQuery.contains("auto_update_time")) {
+        newQuery = newQuery.replace("`auto_update_time` bigint", "`auto_update_time` string")
         return newQuery
       }
     }

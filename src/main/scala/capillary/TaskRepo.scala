@@ -111,7 +111,7 @@ class CapTask(spark: SparkSession, sc: SparkContext, job_node: Job_node, executi
   @throws[Exception]
   override def call: String = {
 
-    val task_name = job_node.key
+    val task_name = job_node.npath
 
     val dataExtractionService = new DataExtractionService()
     val capQueryModifier = new CapQueryModifier()
@@ -124,6 +124,7 @@ class CapTask(spark: SparkSession, sc: SparkContext, job_node: Job_node, executi
       val baseFilePath = batchDetails.node_folder_loc
 
       val data = dataExtractionService.getdata(baseFilePath + task_name + ".json")
+      // println(data)
       var dummyTask = false;
       if (data != "Dummy") {
         val queries = StringUtils.split(data, "~~~")
@@ -182,8 +183,8 @@ class CapTask(spark: SparkSession, sc: SparkContext, job_node: Job_node, executi
   def executeQuery(query: String): Unit = {
 
     if (batchDetails.test == true) {
-//      val batch_id = batchDetails.batch_id
-//      println(s"Running query for batch [$batch_id] index # [$index]  " + query)
+      val batch_id = batchDetails.batch_id
+      println(s"Running query for batch [$batch_id] index # [$index]  " + query)
     } else {
       sc.setLocalProperty("spark.scheduler.pool", token)
       sc.setLocalProperty("spark.scheduler.pool", "description - "+ token)
