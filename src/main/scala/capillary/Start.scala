@@ -14,8 +14,9 @@ import java.io.File
 
 object start {
 
-  val projectBasePath = "/Users/vijay.pavan/IdeaProjects/03.Capillary/newmetadata20200315/DAG/"
-  // val projectBasePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /orch/DAG Metadata /"
+//  val projectBasePath = "/Users/vijay.pavan/IdeaProjects/03.Capillary/newmetadata20200315/DAG/"
+   val projectBasePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/DAG/"
+
 
   def main(args: Array[String]): Unit = {
 
@@ -38,7 +39,7 @@ object start {
     val orgs: List[String] = List()
 
 
-    val logger: AppLogger = new EsBasedLogger("localhost", 9200, "localhost", 9201);
+    val logger: AppLogger = new EsBasedLogger(false,"localhost", 9200, "localhost", 9201);
     val executionParam: ExecutionParam = new ExecutionParam(parallelThread = 400, orgs);
 
     val start = new StartLoad(sc = sc, spark = spark, executionParam = executionParam, caplogger = logger)
@@ -66,7 +67,7 @@ object start {
       .getOrCreate()
 
 
-    val caplogger: AppLogger = new EsBasedLogger("localhost", 9200, "localhost", 9201);
+    val caplogger: AppLogger = new EsBasedLogger(false,"localhost", 9200, "localhost", 9201);
 
     val sc = spark.sqlContext.sparkContext
     val orgs: List[String] = List()

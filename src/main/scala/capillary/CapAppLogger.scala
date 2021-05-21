@@ -24,7 +24,7 @@ import org.elasticsearch.search.Scroll
 import scala.collection.mutable
 
 trait AppLogger {
-  var loggerSwitch = true;
+  var loggerSwitch = false;
 
   def log(logEntry: LogEntry): Unit
 
@@ -44,6 +44,8 @@ trait AppLogger {
   def closeLogger(): Unit
 
   def storeBatchDetails(batchDetails: BatchDetails, executionParam: ExecutionParam): Unit
+
+
 }
 
 
@@ -306,13 +308,14 @@ class EsLogIngestor(restClient: RestHighLevelClient, logs: java.util.concurrent.
   }
 }
 
-class EsBasedLogger() extends AppLogger {
+class EsBasedLogger(esloggerSwitch: Boolean) extends AppLogger {
 
 
   val batch_details_index_name = "batch_details"
   val batch_log_index_name = "batch_log"
   val logs = new java.util.concurrent.ConcurrentLinkedQueue[LogEntry]
   var ingestor: EsLogIngestor = null
+
 
   var restClient: RestHighLevelClient = null;
 
@@ -333,23 +336,27 @@ class EsBasedLogger() extends AppLogger {
     ingestor.start()
   }
 
-  def this(hostName: String, port: Int) {
-    this()
-    restClient = new RestHighLevelClient(RestClient.builder(
-      new HttpHost("localhost", 9200, "http"),
-      new HttpHost("localhost", 9201, "http")));
-    checkOrCreateIndex(List(batch_details_index_name, batch_log_index_name, "my-index"))
-    startIngestor()
+  def this(switch: Boolean, hostName: String, port: Int) {
+    this(switch)
+    if (esloggerSwitch) {
+      restClient = new RestHighLevelClient(RestClient.builder(
+        new HttpHost("localhost", 9200, "http"),
+        new HttpHost("localhost", 9201, "http")));
+      checkOrCreateIndex(List(batch_details_index_name, batch_log_index_name, "my-index"))
+      startIngestor()
+    }
   }
 
-  def this(primaryHostName: String, primaryPort: Int, secondaryHostName: String, secondaryPort: Int) {
-    this()
-    restClient = new RestHighLevelClient(RestClient.builder(
-      new HttpHost(primaryHostName, primaryPort, "http"),
-      new HttpHost(secondaryHostName, secondaryPort, "http")));
+  def this(switch: Boolean, primaryHostName: String, primaryPort: Int, secondaryHostName: String, secondaryPort: Int) {
+    this(switch)
+    if (esloggerSwitch) {
+      restClient = new RestHighLevelClient(RestClient.builder(
+        new HttpHost(primaryHostName, primaryPort, "http"),
+        new HttpHost(secondaryHostName, secondaryPort, "http")));
 
-    checkOrCreateIndex(List(batch_details_index_name, batch_log_index_name, "my-index"))
-    startIngestor()
+      checkOrCreateIndex(List(batch_details_index_name, batch_log_index_name, "my-index"))
+      startIngestor()
+    }
   }
 
 
@@ -422,13 +429,11 @@ class EsBasedLogger() extends AppLogger {
     while (searchHits != null && searchHits.length > 0) {
 
 
-      if  (searchHits.length >0)
-      {
-          for (n <- searchHits)
-          {
-            val log = n.getSourceAsMap()
-            logList += log.get("TASK_ID").toString
-          }
+      if (searchHits.length > 0) {
+        for (n <- searchHits) {
+          val log = n.getSourceAsMap()
+          logList += log.get("TASK_ID").toString
+        }
       }
 
       val scrollRequest: SearchScrollRequest = new SearchScrollRequest(scrollId);
@@ -438,9 +443,9 @@ class EsBasedLogger() extends AppLogger {
       searchHits = searchResponse.getHits().getHits();
     }
 
-    val clearScrollRequest:ClearScrollRequest = new ClearScrollRequest();
+    val clearScrollRequest: ClearScrollRequest = new ClearScrollRequest();
     clearScrollRequest.addScrollId(scrollId);
-    val clearScrollResponse:ClearScrollResponse = restClient.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
+    val clearScrollResponse: ClearScrollResponse = restClient.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
     val succeeded = clearScrollResponse.isSucceeded();
 
 
@@ -502,24 +507,28 @@ class EsBasedLogger() extends AppLogger {
 
   override def storeBatchDetails(batchDetails: BatchDetails, executionParam: ExecutionParam): Unit = {
 
-    val log = new java.util.HashMap[String, AnyRef]()
-    log.put("batch_id", Integer.valueOf(batchDetails.batch_id + ""))
-    log.put("restart", batchDetails.restart + "")
-    log.put("node_folder_loc", batchDetails.node_folder_loc + "")
-    log.put("spark_mode", batchDetails.spark_mode + "")
-    log.put("node_link_loc", batchDetails.node_link_loc + "")
-    log.put("seed_file_loc", batchDetails.seed_file_loc + "")
-    log.put("seed_rel_file_loc", batchDetails.seed_rel_file_loc + "")
-    log.put("parallelThread", executionParam.parallelThread + "")
+    if (esloggerSwitch) {
+      val log = new java.util.HashMap[String, AnyRef]()
+      log.put("batch_id", Integer.valueOf(batchDetails.batch_id + ""))
+      log.put("restart", batchDetails.restart + "")
+      log.put("node_folder_loc", batchDetails.node_folder_loc + "")
+      log.put("spark_mode", batchDetails.spark_mode + "")
+      log.put("node_link_loc", batchDetails.node_link_loc + "")
+      log.put("seed_file_loc", batchDetails.seed_file_loc + "")
+      log.put("seed_rel_file_loc", batchDetails.seed_rel_file_loc + "")
+      log.put("parallelThread", executionParam.parallelThread + "")
 
 
-    val esLogEntry = new IndexRequest(batch_details_index_name)
-    esLogEntry.source(log)
-    val indexResponse2 = restClient.index(esLogEntry, RequestOptions.DEFAULT)
+      val esLogEntry = new IndexRequest(batch_details_index_name)
+      esLogEntry.source(log)
+      val indexResponse2 = restClient.index(esLogEntry, RequestOptions.DEFAULT)
+    }
   }
 
 
   override def getLatestBathcId(): Long = {
+    if (esloggerSwitch == false)
+      return 0
 
     val searchRequestmax = new SearchRequest(batch_details_index_name);
 
