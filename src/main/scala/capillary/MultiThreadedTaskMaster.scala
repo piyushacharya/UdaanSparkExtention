@@ -2,7 +2,6 @@ package capillary
 
 import java.util.concurrent.{Callable, ConcurrentHashMap, Executors, ScheduledFuture, TimeUnit}
 import scala.collection.mutable.ListBuffer
-import scala.util.Random
 
 trait BaseTask extends Callable[String] {
 

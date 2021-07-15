@@ -6,7 +6,7 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="capillary.start" level="trace" additivity="false">
+        <Logger name="capillary.Start" level="trace" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
         <Root level="error">

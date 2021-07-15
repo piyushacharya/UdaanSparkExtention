@@ -421,7 +421,7 @@ class GraphService {
             n.status = NodeStatus.init
             new LogEntryBuilder().withBatchId(batchDetails.batch_id).withTaskId(n.key).withGroup("TASK_DETAILS").withType("TASK_BEFORE_SUBMITTED").buildAndLog(caplogger);
             //          val capTestTask = new SimpleSparkTestTask(spark = spark, sc = sc, job_node = n, executionParam = executionParam, batchDetails = batchDetails,caplogger=caplogger)
-            println("N.key :: " + n.key)
+           // println("N.key :: " + n.key)
             val capTestTask = new CapTask(spark = spark, sc = sc, job_node = n, executionParam = executionParam, batchDetails = batchDetails, caplogger = caplogger)
 
             index = index + 1

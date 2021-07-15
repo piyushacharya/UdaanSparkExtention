@@ -77,16 +77,24 @@ object StartSQLReviewForAllOrgs {
               println("Stop for Inspection")
               de.getdata(baseFilePath + n.npath + ".json")
             }
-            if (consolidate_query !=
-              "Dummy") {
+            if (consolidate_query != "Dummy") {
+
+              /*if (consolidate_query.contains("pid_slab_number_map")) {
+                println("debugger")
+              }*/
+
               val queries = StringUtils.split(consolidate_query, "~~~")
               var queryAddedInfile = false
               for (query <- queries) {
 
-                if (capQueryModifier.isQueryExecutable(batchDetails, query)) {
-                  val newQuery = capQueryModifier.modifyQuery(query)
+                if (consolidate_query.contains("masters__hive_intermediate_16918__incr.stores_add_ons")) {
+                  println("debugger")
+                }
 
-                  var addQuery = true
+                if (capQueryModifier.isQueryExecutable(batchDetails, query.trim)) {
+                  val newQuery = capQueryModifier.modifyQuery(query.trim)
+
+                  val addQuery = true
 
 
                   if (addQuery == true && writer == null && orgwriter == null) {
@@ -101,8 +109,7 @@ object StartSQLReviewForAllOrgs {
                     queryCount = queryCount + 1
                     queryAddedInfile = true
                   }
-
-                }
+                } // end if isQueryExecutable
 
 
               }

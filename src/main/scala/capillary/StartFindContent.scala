@@ -69,8 +69,12 @@ object StartFindContent {
             // new_kpi_compute_100323.ResultTable_from_JoinedTable_L_1_coupons_coupons_d_4f29b2dcebaf4
             // ead_api_100323.response_bill_summary;
             // read_api_100323.response_bill_summary__view
-            if (query.toLowerCase().contains("dimension_src_merged_100359.subscription_transpose_100359_merged_temp".toLowerCase())  ){
-             // && query.toLowerCase().contains("customer_summary") ) {
+            // dimension_src_merged_100425.loyaty_txn_extended_fields_transpose_100425_merged
+            // profile_v2_comm_channels_mongo_doc_transpose_100507_merged__view
+            // target_100581`.`store_custom_fields
+            // read_api_100292`.`customer_summary
+            if (query.toLowerCase().contains("customer_summary".toLowerCase()) // ){
+              && query.toLowerCase().contains("read_api_100292") ) {
               // println(query)
               println("\n*********************" + n.npath)
             }

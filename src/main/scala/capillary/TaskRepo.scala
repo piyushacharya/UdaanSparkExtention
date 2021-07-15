@@ -4,6 +4,8 @@ import org.apache.commons.lang.StringUtils
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.analysis.UnresolvedException
+import sun.jvm.hotspot.runtime
+
 import scala.util.Random
 
 
@@ -174,6 +176,10 @@ class CapTask(spark: SparkSession, sc: SparkContext, job_node: Job_node, executi
           status = TaskStatus.Error;
           errorMessage = e.getMessage
           new LogEntryBuilder().withBatchId(batchDetails.batch_id).withTaskId(task_name).withGroup("TASK_DETAILS").withType("TASK_QUERY_ERROR").withRemark(e.getMessage).withRemarkType("ERROR").withQuery(runningQuery).buildAndLog(caplogger);
+          // if table name __history
+          // job_node.status = NodeStatus.dead_end
+          // println job id & query..
+
         }
       }
     }
@@ -184,7 +190,7 @@ class CapTask(spark: SparkSession, sc: SparkContext, job_node: Job_node, executi
 
     if (batchDetails.test == true) {
       val batch_id = batchDetails.batch_id
-      println(s"Running query for batch [$batch_id] index # [$index]  " + query)
+      println(s"Running query for batch [$batch_id] index # [$index], Query : $query")
     } else {
       sc.setLocalProperty("spark.scheduler.pool", token)
       sc.setLocalProperty("spark.scheduler.pool", "description - "+ token)

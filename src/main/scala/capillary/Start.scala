@@ -1,21 +1,16 @@
 package capillary
 
-import org.apache.spark.sql.{Row, SparkSession}
-
-import java.io.PrintWriter
-import scala.collection.mutable
-import scala.io.Source
+import org.apache.spark.sql.SparkSession
 import org.apache.commons.lang.StringUtils
-
-import java.sql.{Connection, DriverManager}
 import scala.collection.mutable.ListBuffer
+import java.io.PrintWriter
 import java.io.File
 
 
-object start {
+object Start {
 
-//  val projectBasePath = "/Users/vijay.pavan/IdeaProjects/03.Capillary/newmetadata20200315/DAG/"
-   val projectBasePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/DAG/"
+  val projectBasePath = "/Users/vijay.pavan/IdeaProjects/03.Capillary/newmetadata20200315/DAG/"
+  //val projectBasePath = "/Users/piyush.acharya/MyWorkSpace/Databricks/Projects /03 Capillary /newmetadata20200315/DAG/"
 
 
   def main(args: Array[String]): Unit = {
@@ -29,7 +24,7 @@ object start {
 
     val spark = SparkSession
       .builder()
-      .appName("Test ")
+      .appName("Test Run")
       .master("local[*]")
       .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
       .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
@@ -38,21 +33,19 @@ object start {
     val sc = spark.sqlContext.sparkContext
     val orgs: List[String] = List()
 
-
-    val logger: AppLogger = new EsBasedLogger(false,"localhost", 9200, "localhost", 9201);
-    val executionParam: ExecutionParam = new ExecutionParam(parallelThread = 400, orgs);
+    val logger: AppLogger = new EsBasedLogger(true, "localhost", 9200, 
+      "localhost", 9201)
+    val executionParam: ExecutionParam = ExecutionParam(parallelThread = 400, orgs)
 
     val start = new StartLoad(sc = sc, spark = spark, executionParam = executionParam, caplogger = logger)
     start.addLocation(seed_rel_file_loc, "seed_rel_file_loc")
     start.addLocation(node_link_loc, "node_link_loc")
     start.addLocation(node_folder_loc, "node_folder_loc")
 
-    start.startLoad(0, true)
-
-
+    val isTestRun : Boolean = true
+    start.startLoad(2, isTestRun)
+    
     logger.closeLogger()
-
-
   }
 
 
@@ -67,7 +60,7 @@ object start {
       .getOrCreate()
 
 
-    val caplogger: AppLogger = new EsBasedLogger(false,"localhost", 9200, "localhost", 9201);
+    val caplogger: AppLogger = new EsBasedLogger(false, "localhost", 9200, "localhost", 9201)
 
     val sc = spark.sqlContext.sparkContext
     val orgs: List[String] = List()
@@ -78,20 +71,20 @@ object start {
 
 
     if (curr_batch_id == 0)
-      curr_batch_id = caplogger.getLatestBathcId() + 1L
+      curr_batch_id = caplogger.getLatestBatchId() + 1L
     else
       restart = true
 
     println("batch_id " + curr_batch_id)
 
-    val executionParam: ExecutionParam = new ExecutionParam(parallelThread = 1, orgs);
+    val executionParam: ExecutionParam = ExecutionParam(parallelThread = 1, orgs)
 
-    val batchDetails: BatchDetails = new BatchDetails("local", curr_batch_id, null, null, null, null, restart, false)
+    val batchDetails: BatchDetails = BatchDetails("local", curr_batch_id, null, null, null, null, restart, false)
     caplogger.storeBatchDetails(batchDetails = batchDetails, executionParam = executionParam)
 
 
     val graphLoader = new GraphLoader()
-    val graph = graphLoader.getGraph();
+    val graph = graphLoader.getGraph()
     val graphService = new GraphService()
 
     try {
@@ -124,7 +117,6 @@ object start {
       source.close()
     }
 
-    import scala.collection.mutable.ListBuffer
     var name = Set("audit_logs.entity_life_cycle")
     name += "campaign_meta_details.group_version_details"
     name += "campaign_meta_details.group_details"
@@ -2194,7 +2186,7 @@ object start {
       new File(outFileNameLocation).delete()
 
     } catch {
-      case e: Exception => println("Some error while deleting... ")
+      case e: Exception => println(s"Some error while deleting... $e")
     } finally {
       new File(outFileNameLocation).mkdir()
     }
@@ -2210,9 +2202,9 @@ object start {
     val node_link_loc = projectBasePath + "newmetadata20200315/DAG/neo4j_dump_2021_03_15.csv"
     //    val orgs: List[String] = List("100323")
     val orgs: List[String] = List("100323")
-    val executionParam: ExecutionParam = new ExecutionParam(parallelThread = 400, orgs);
+    val executionParam: ExecutionParam = ExecutionParam(parallelThread = 400, orgs)
     val graphService = new GraphService()
-    val batchDetails: BatchDetails = new BatchDetails("local", 1, null, null, null, null, false, false)
+    val batchDetails: BatchDetails = BatchDetails("local", 1, null, null, null, null, false, false)
 
     val capQueryModifier = new CapQueryModifier()
 
@@ -2226,10 +2218,10 @@ object start {
 
 
     val runForOrgans: List[String] = executionParam.runForOrgans
-    var queryCount = 0;
+    var queryCount = 0
     var index = 0
     val orgnId = "100323"
-    while (nodes.length > 0 || keepgoing == true) {
+    while (nodes.nonEmpty || keepgoing) {
       var writer: PrintWriter = null
       var orgwriter: PrintWriter = null
 
@@ -2252,27 +2244,27 @@ object start {
         PreTransformfortableorgCreateOrgLevelTablesfortable
         * */
 
-//        if (n.npath != null  && n.npath.contains("16918_create_view_dim_64_org_100323dim_target_table_creation100323bff7849d-6023-4943-b420-45b326b4294e")  )
-//          println("looking into ....")
+        //        if (n.npath != null  && n.npath.contains("16918_create_view_dim_64_org_100323dim_target_table_creation100323bff7849d-6023-4943-b420-45b326b4294e")  )
+        //          println("looking into ....")
 
         var createRrpreTransformforFile = false
-       if (n.npath != null && (n.npath.contains("Createpredimd") || n.npath.contains("Createpre") || n.npath.contains("Creatingdummy") || n.npath.contains("CreateRepartitioned")  || n.npath.contains("CreateDB_transpose") )) {
+        if (n.npath != null && (n.npath.contains("Createpredimd") || n.npath.contains("Createpre") || n.npath.contains("Creatingdummy") || n.npath.contains("CreateRepartitioned") || n.npath.contains("CreateDB_transpose"))) {
           pathConsider = true
-        }else if (n.npath != null && ( n.npath.contains("PreTransformfororg") ||  n.npath.contains("CreateOrgLevelTablesfortable") ||  n.npath.contains("PreTransformfortableinventory")  )) {
-         pathConsider = true
-         createRrpreTransformforFile = true;
-       }else if (n.npath != null && ( n.npath.contains("_transpose") )) {
-         pathConsider = true
-         createRrpreTransformforFile = true;
-       }
+        } else if (n.npath != null && (n.npath.contains("PreTransformfororg") || n.npath.contains("CreateOrgLevelTablesfortable") || n.npath.contains("PreTransformfortableinventory"))) {
+          pathConsider = true
+          createRrpreTransformforFile = true
+        } else if (n.npath != null && n.npath.contains("_transpose") ) {
+          pathConsider = true
+          createRrpreTransformforFile = true
+        }
 
-        if (n.npath != null && "null".equalsIgnoreCase(n.npath) == false && pathConsider == true) {
+        if (n.npath != null && !"null".equalsIgnoreCase(n.npath) && pathConsider ) {
 
 
           val nodeJsonPath = n.npath
 
           val consolidate_query = de.getdata(baseFilePath + n.npath + ".json")
-          var dummyTask = false;
+          var dummyTask = false
           if ("select 1".equalsIgnoreCase(consolidate_query)) {
             println("Stop for Inspection")
             de.getdata(baseFilePath + n.npath + ".json")
@@ -2292,7 +2284,7 @@ object start {
                   addQuery = true
                 } else if (createRrpreTransformforFile == true && query.contains(orgnId)) {
                   addQuery = true
-                }else if (createRrpreTransformforFile == true && capQueryModifier.isSplCondition(query)) {
+                } else if (createRrpreTransformforFile == true && capQueryModifier.isSplCondition(query)) {
                   addQuery = true
                 }
 
@@ -2302,8 +2294,7 @@ object start {
                   orgwriter = new PrintWriter(new File(orgoutFileNameLocation + index + ".sql"))
                   index = index + 1
                 }
-                if (addQuery)
-                {
+                if (addQuery) {
                   println(newQuery)
                   orgwriter.write(query + ";\n\r")
                   writer.write(newQuery + ";\n\r")
@@ -2330,7 +2321,7 @@ object start {
 
       nodes = graph.get_nodes_for_execution
       if (nodes.length < 1)
-        keepgoing = false;
+        keepgoing = false
 
       if (orgwriter != null && writer != null) {
         writer.close()
@@ -2340,7 +2331,7 @@ object start {
 
     }
 
-    println(s"Done processing , total quries to process $queryCount ")
+    println(s"Done processing , total queries to process $queryCount ")
   }
 
 
